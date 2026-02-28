@@ -395,160 +395,275 @@
                 </div>
 
                 <!-- ── STEP 3: FULL CHAT ── -->
-                <div id="step-chat" class="hidden flex-col h-full min-h-0">
-                    <!-- Admin panel banner (only visible when admin) -->
-                    <div id="admin-sidebar" class="hidden shrink-0 border-b border-white/[0.07] bg-black/40">
-                        <!-- Session tabs row -->
-                        <div class="px-3 py-2 overflow-x-auto">
-                            <div id="admin-user-list" class="flex gap-2 items-center min-w-max">
-                                <span
-                                    class="text-[10px] font-bold text-brand-purple uppercase tracking-widest mr-1">Sessions:</span>
-                            </div>
-                        </div>
-                        <!-- Admin call & action strip -->
-                        <div class="px-3 pb-2 flex items-center gap-2">
-                            <button onclick="startCall('audio')"
-                                class="flex items-center gap-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 border border-green-500/30 rounded-full px-3 py-1.5 text-xs font-bold transition-colors">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                                Voice Call
-                            </button>
-                            <button onclick="startCall('video')"
-                                class="flex items-center gap-1.5 bg-brand-purple/20 hover:bg-brand-purple/30 text-brand-purple border border-brand-purple/30 rounded-full px-3 py-1.5 text-xs font-bold transition-colors">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                Video Call
-                            </button>
-                        </div>
-                    </div>
+                <div id="step-chat" class="hidden flex-col h-full min-h-0 overflow-hidden">
 
-                    <!-- Messages -->
-                    <div id="messages-container" class="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
-                        <div
-                            class="text-center text-[11px] text-brand-accent/50 uppercase tracking-widest font-mono flex items-center justify-center gap-2 py-2">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                            </svg>
-                            Private Encrypted Session
-                        </div>
-                    </div>
+                    <!-- ══ ADMIN LAYOUT (two-column) ══ -->
+                    <div id="admin-layout" class="hidden h-full min-h-0 flex overflow-hidden">
 
-                    <!-- Call bar (shown during active call) -->
-                    <div id="call-bar"
-                        class="hidden shrink-0 px-4 py-2 border-t border-green-500/20 bg-green-900/20 flex items-center gap-3">
-                        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                        <span class="text-green-300 text-xs font-mono flex-1">Call in progress…</span>
-                        <button onclick="endCall()"
-                            class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">End
-                            Call</button>
-                    </div>
-
-                    <!-- Media preview strip -->
-                    <div id="media-preview"
-                        class="hidden px-4 py-2 border-t border-white/[0.07] bg-black/20 flex gap-2 items-center shrink-0">
-                        <span id="media-preview-label" class="text-xs text-gray-400 flex-1 truncate"></span>
-                        <button id="media-cancel"
-                            class="text-gray-500 hover:text-red-400 transition-colors text-xs">Cancel</button>
-                    </div>
-
-                    <!-- Recording indicator -->
-                    <div id="recording-bar"
-                        class="hidden px-5 py-2 bg-red-900/30 border-t border-red-500/20 flex items-center gap-3 shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
-                        <span id="recording-label" class="text-red-300 text-xs font-mono flex-1">Recording...</span>
-                        <button id="stop-recording"
-                            class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">Stop
-                            & Send</button>
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="px-4 py-3 border-t border-white/[0.07] shrink-0 bg-[#0a0a14]">
-                        <div class="flex items-end gap-2 max-w-full">
-                            <!-- Media buttons -->
-                            <div class="flex gap-1 flex-shrink-0 pb-1">
-                                <!-- Image/Video attach -->
-                                <label for="file-input"
-                                    class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all cursor-pointer"
-                                    title="Attach image or video">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                    </svg>
-                                </label>
-                                <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
-                                <!-- Voice note -->
-                                <button type="button" id="voice-btn"
-                                    class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-accent transition-all"
-                                    title="Voice note">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                    </svg>
-                                </button>
-                                <!-- Video note -->
-                                <button type="button" id="vidnote-btn"
-                                    class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-purple transition-all"
-                                    title="Video note">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                </button>
+                        <!-- LEFT: Contacts Sidebar -->
+                        <div id="contacts-sidebar"
+                            class="w-[220px] flex-shrink-0 border-r border-white/[0.07] flex flex-col bg-black/30 min-h-0">
+                            <!-- Sidebar header -->
+                            <div class="px-3 pt-3 pb-2 shrink-0">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span
+                                        class="text-[10px] font-bold text-brand-purple uppercase tracking-widest">Contacts</span>
+                                    <button id="show-add-contact"
+                                        class="w-6 h-6 rounded-full bg-brand-purple/20 hover:bg-brand-purple/40 text-brand-purple flex items-center justify-center transition-colors"
+                                        title="Add contact">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M12 4v16m8-8H4" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <!-- Search -->
+                                <input id="contact-search" type="text" placeholder="Search…"
+                                    class="w-full bg-white/[0.05] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-purple/40 transition-colors">
                             </div>
 
-                            <!-- Text input -->
-                            <form id="chat-form" class="flex flex-1 gap-2 items-end">
-                                <textarea id="message-input" placeholder="Message…" rows="1" autocomplete="off"
-                                    class="flex-1 bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple/40 transition-colors resize-none leading-relaxed max-h-28 overflow-y-auto"></textarea>
-                                <button type="submit"
-                                    class="w-10 h-10 bg-brand-purple hover:bg-brand-purple/80 rounded-full flex items-center justify-center transition-colors flex-shrink-0 shadow-[0_0_15px_rgba(124,58,237,0.3)] mb-0.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                            <!-- Contact list -->
+                            <div id="admin-user-list" class="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5 min-h-0">
+                            </div>
+
+                            <!-- Add contact panel -->
+                            <div id="add-contact-panel"
+                                class="hidden px-3 py-3 border-t border-white/[0.07] bg-black/20 shrink-0 space-y-2">
+                                <p class="text-[10px] font-bold text-brand-accent uppercase tracking-widest">New Contact
+                                </p>
+                                <input id="new-code-name" type="text" placeholder="Name"
+                                    class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-accent/40">
+                                <input id="new-code-val" type="text" placeholder="Code e.g. NEHA1"
+                                    class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-accent/40 uppercase font-mono">
+                                <button id="assign-code-btn"
+                                    class="w-full bg-brand-accent/20 hover:bg-brand-accent/30 text-brand-accent border border-brand-accent/30 rounded-xl py-2 text-xs font-bold transition-colors">Assign
+                                    Code</button>
+                                <p id="assign-feedback" class="text-xs text-green-400 text-center hidden">✓ Saved!</p>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Chat area -->
+                        <div class="flex-1 flex flex-col min-h-0 min-w-0">
+                            <!-- Chat top bar -->
+                            <div id="admin-chat-header"
+                                class="shrink-0 px-4 py-3 border-b border-white/[0.07] bg-black/20 flex items-center gap-3">
+                                <div id="admin-contact-avatar"
+                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-purple to-brand-accent flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                    ?</div>
+                                <div class="flex-1 min-w-0">
+                                    <p id="admin-contact-name" class="text-sm font-semibold text-white truncate">Select
+                                        a contact</p>
+                                    <p id="admin-contact-sub" class="text-[11px] text-gray-500 truncate">—</p>
+                                </div>
+                                <!-- Call buttons -->
+                                <div class="flex gap-1.5 flex-shrink-0">
+                                    <button onclick="startCall('audio')" title="Voice call"
+                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-green-500/15 hover:bg-green-500/30 text-green-400 border border-green-500/20 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="startCall('video')" title="Video call"
+                                        class="w-8 h-8 flex items-center justify-center rounded-full bg-brand-purple/15 hover:bg-brand-purple/30 text-brand-purple border border-brand-purple/20 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Call bar -->
+                            <div id="call-bar"
+                                class="hidden shrink-0 px-4 py-2 border-b border-green-500/20 bg-green-900/20 flex items-center gap-3">
+                                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                                <span class="text-green-300 text-xs font-mono flex-1">Call in progress…</span>
+                                <button onclick="endCall()"
+                                    class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">End</button>
+                            </div>
+
+                            <!-- Messages -->
+                            <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+                                <div class="flex flex-col items-center justify-center h-full gap-3 opacity-30">
+                                    <svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
-                                </button>
-                            </form>
-                        </div>
+                                    <p class="text-xs text-gray-500">Select a contact to view chat</p>
+                                </div>
+                            </div>
 
-                        <!-- Admin: assign code panel -->
-                        <div id="admin-tools" class="hidden mt-2 flex flex-wrap gap-2 items-center">
-                            <input id="new-code-name" type="text" placeholder="Name"
-                                class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-accent/40 w-24">
-                            <input id="new-code-val" type="text" placeholder="Code e.g. NEHA1"
-                                class="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-brand-accent/40 w-32 uppercase font-mono">
-                            <button id="assign-code-btn"
-                                class="bg-brand-accent/20 hover:bg-brand-accent/30 text-brand-accent border border-brand-accent/30 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors">+
-                                Assign</button>
-                            <p id="assign-feedback" class="text-xs text-green-400 hidden">Saved!</p>
+                            <!-- Media preview -->
+                            <div id="media-preview"
+                                class="hidden px-4 py-2 border-t border-white/[0.07] bg-black/20 flex gap-2 items-center shrink-0">
+                                <span id="media-preview-label" class="text-xs text-gray-400 flex-1 truncate"></span>
+                                <button id="media-cancel"
+                                    class="text-gray-500 hover:text-red-400 transition-colors text-xs">Cancel</button>
+                            </div>
+
+                            <!-- Recording bar -->
+                            <div id="recording-bar"
+                                class="hidden px-4 py-2 bg-red-900/30 border-t border-red-500/20 flex items-center gap-3 shrink-0">
+                                <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                                <span id="recording-label"
+                                    class="text-red-300 text-xs font-mono flex-1">Recording…</span>
+                                <button id="stop-recording"
+                                    class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">Stop
+                                    & Send</button>
+                            </div>
+
+                            <!-- Input area -->
+                            <div class="px-3 py-3 border-t border-white/[0.07] shrink-0 bg-[#0a0a14]">
+                                <div class="flex items-end gap-2">
+                                    <div class="flex gap-1 flex-shrink-0 pb-0.5">
+                                        <label for="file-input"
+                                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all cursor-pointer"
+                                            title="Attach">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                            </svg>
+                                        </label>
+                                        <input type="file" id="file-input" class="hidden" accept="image/*,video/*">
+                                        <button type="button" id="voice-btn"
+                                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-accent transition-all"
+                                            title="Voice note">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                            </svg>
+                                        </button>
+                                        <button type="button" id="vidnote-btn"
+                                            class="w-8 h-8 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-purple transition-all"
+                                            title="Video note">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <form id="chat-form" class="flex flex-1 gap-2 items-end">
+                                        <textarea id="message-input" placeholder="Message…" rows="1" autocomplete="off"
+                                            class="flex-1 bg-white/[0.06] border border-white/10 rounded-2xl px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple/40 transition-colors resize-none leading-relaxed max-h-24 overflow-y-auto"></textarea>
+                                        <button type="submit"
+                                            class="w-9 h-9 bg-brand-purple hover:bg-brand-purple/80 rounded-full flex items-center justify-center transition-colors flex-shrink-0 shadow-[0_0_12px_rgba(124,58,237,0.3)] mb-0.5">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Footer -->
-        <footer class="w-full py-8 text-center text-gray-600 border-t border-white/5 relative z-10 mt-20">
-            <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p>&copy; 2026 Het Patel. All rights reserved.</p>
-                <div class="flex gap-6 footer-links">
-                    <a href="#" class="hover:text-white transition-colors relative group"><span
-                            class="relative z-10">GitHub</span><span
-                            class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
-                    <a href="#" class="hover:text-white transition-colors relative group"><span
-                            class="relative z-10">LinkedIn</span><span
-                            class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
-                    <a href="#" class="hover:text-white transition-colors relative group"><span
-                            class="relative z-10">Twitter</span><span
-                            class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+                    <!-- ══ REGULAR USER LAYOUT (single column) ══ -->
+                    <div id="user-layout" class="hidden flex-col h-full min-h-0">
+                        <!-- Messages -->
+                        <div id="user-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+                            <div
+                                class="text-center text-[11px] text-brand-accent/50 uppercase tracking-widest font-mono flex items-center justify-center gap-2 py-2">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                                Private Encrypted Session
+                            </div>
+                        </div>
+                        <!-- User call bar -->
+                        <div id="user-call-bar"
+                            class="hidden shrink-0 px-4 py-2 border-t border-green-500/20 bg-green-900/20 flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                            <span class="text-green-300 text-xs font-mono flex-1">Call in progress…</span>
+                            <button onclick="endCall()"
+                                class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">End</button>
+                        </div>
+                        <!-- User media preview -->
+                        <div id="user-media-preview"
+                            class="hidden px-4 py-2 border-t border-white/[0.07] bg-black/20 flex gap-2 items-center shrink-0">
+                            <span id="user-media-label" class="text-xs text-gray-400 flex-1 truncate"></span>
+                            <button id="user-media-cancel"
+                                class="text-gray-500 hover:text-red-400 transition-colors text-xs">Cancel</button>
+                        </div>
+                        <!-- User recording bar -->
+                        <div id="user-recording-bar"
+                            class="hidden px-4 py-2 bg-red-900/30 border-t border-red-500/20 flex items-center gap-3 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                            <span id="user-recording-label"
+                                class="text-red-300 text-xs font-mono flex-1">Recording…</span>
+                            <button id="user-stop-recording"
+                                class="text-xs bg-red-500 hover:bg-red-600 text-white rounded-full px-3 py-1 transition-colors">Stop
+                                & Send</button>
+                        </div>
+                        <!-- User input -->
+                        <div class="px-4 py-3 border-t border-white/[0.07] shrink-0 bg-[#0a0a14]">
+                            <div class="flex items-end gap-2">
+                                <div class="flex gap-1 flex-shrink-0 pb-0.5">
+                                    <label for="user-file-input"
+                                        class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-white transition-all cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                        </svg>
+                                    </label>
+                                    <input type="file" id="user-file-input" class="hidden" accept="image/*,video/*">
+                                    <button type="button" id="user-voice-btn"
+                                        class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-accent transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" id="user-vidnote-btn"
+                                        class="w-9 h-9 flex items-center justify-center rounded-full bg-white/[0.06] hover:bg-white/10 border border-white/10 text-gray-400 hover:text-brand-purple transition-all">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <form id="user-chat-form" class="flex flex-1 gap-2 items-end">
+                                    <textarea id="user-message-input" placeholder="Message…" rows="1" autocomplete="off"
+                                        class="flex-1 bg-white/[0.06] border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple/40 transition-colors resize-none leading-relaxed max-h-28 overflow-y-auto"></textarea>
+                                    <button type="submit"
+                                        class="w-10 h-10 bg-brand-purple hover:bg-brand-purple/80 rounded-full flex items-center justify-center transition-colors flex-shrink-0 shadow-[0_0_15px_rgba(124,58,237,0.3)] mb-0.5">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-        </footer>
+
+                <!-- Footer -->
+                <footer class="w-full py-8 text-center text-gray-600 border-t border-white/5 relative z-10 mt-20">
+                    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <p>&copy; 2026 Het Patel. All rights reserved.</p>
+                        <div class="flex gap-6 footer-links">
+                            <a href="#" class="hover:text-white transition-colors relative group"><span
+                                    class="relative z-10">GitHub</span><span
+                                    class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+                            <a href="#" class="hover:text-white transition-colors relative group"><span
+                                    class="relative z-10">LinkedIn</span><span
+                                    class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+                            <a href="#" class="hover:text-white transition-colors relative group"><span
+                                    class="relative z-10">Twitter</span><span
+                                    class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+                        </div>
+                    </div>
+                </footer>
     </main>
 
     <!-- Scripts -->

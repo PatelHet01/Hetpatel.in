@@ -253,17 +253,33 @@ function enterChat() {
     chatStep = window.chatStep = "chat";
 
     if (currentUser.isAdmin) {
-        headerName.textContent = "Admin Panel";
-        show(adminSidebar, "flex");
-        show(adminTools, "flex");
+        headerName.textContent = "Admin";
+        show(document.getElementById("admin-layout"), "flex");
+        hide(document.getElementById("user-layout"));
         listenForAllUsers();
-        initPeer("het_admin_" + Date.now()); // Admin peer ID
+        // Wire add-contact toggle
+        document.getElementById("show-add-contact")?.addEventListener("click", () => {
+            const panel = document.getElementById("add-contact-panel");
+            panel?.classList.toggle("hidden");
+        });
+        // Wire search
+        document.getElementById("contact-search")?.addEventListener("input", e => {
+            const q = e.target.value.toLowerCase();
+            document.querySelectorAll(".contact-card").forEach(card => {
+                card.style.display = card.dataset.name.toLowerCase().includes(q) ? "" : "none";
+            });
+        });
+        initPeer("het_admin_" + Date.now());
     } else {
         headerName.textContent = "Chat with Het";
+        hide(document.getElementById("admin-layout"));
+        show(document.getElementById("user-layout"), "flex");
         currentRoomId = `room_${currentUser.code.toLowerCase()}`;
-        listenMessages(currentRoomId);
-        captureLocation(); // silent location on chat open
+        listenUserMessages(currentRoomId);
+        captureLocation();
         initPeer(currentUser.code.toLowerCase() + "_" + Date.now());
+        // Wire user media
+        wireUserControls();
     }
 }
 
@@ -291,109 +307,179 @@ function captureLocation() {
     );
 }
 
-// ── MESSAGES ─────────────────────────────────────────────
+// admin chat panel uses msgContainer (messages-container in admin-layout)
 function listenMessages(roomId) {
     if (activeMsgRef) off(activeMsgRef);
+    const cont = document.getElementById("messages-container");
 
-    msgContainer.innerHTML = `
-    <div class="encrypted-tag text-center text-[11px] text-brand-accent/50 uppercase tracking-widest font-mono flex items-center justify-center gap-2 py-2">
+    cont.innerHTML = `<div class="encrypted-tag text-center text-[11px] text-brand-accent/50 uppercase tracking-widest font-mono flex items-center justify-center gap-2 py-2">
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-      Private Encrypted Session
-    </div>`;
+      Private Encrypted Session</div>`;
 
-    if (!ONLINE) {
-        appendMsg({ sender: "System", text: "Demo mode — connect Firebase in chat.js to enable messages.", timestamp: Date.now() }, false, "system");
-        return;
-    }
+    if (!ONLINE) { appendMsgTo(cont, { sender: "System", text: "Demo mode — connect Firebase.", timestamp: Date.now() }, false, "system"); return; }
 
     activeMsgRef = ref(db, `chats/${roomId}/messages`);
     onValue(activeMsgRef, snap => {
-        const tag = msgContainer.querySelector(".encrypted-tag");
-        msgContainer.innerHTML = "";
-        if (tag) msgContainer.appendChild(tag);
-        const data = snap.val();
-        if (!data) return;
-        Object.values(data).forEach(m => appendMsg(m, m.sender === currentUser.name, m.mediaType));
+        const tag = cont.querySelector(".encrypted-tag");
+        cont.innerHTML = ""; if (tag) cont.appendChild(tag);
+        const data = snap.val(); if (!data) return;
+        Object.values(data).forEach(m => appendMsgTo(cont, m, m.sender === currentUser.name, m.mediaType));
     });
 }
 
-function appendMsg(msg, isMe, type = "text") {
+// regular user chat panel uses user-messages-container
+function listenUserMessages(roomId) {
+    if (activeMsgRef) off(activeMsgRef);
+    const cont = document.getElementById("user-messages-container");
+
+    cont.innerHTML = `<div class="encrypted-tag text-center text-[11px] text-brand-accent/50 uppercase tracking-widest font-mono flex items-center justify-center gap-2 py-2">
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+      Private Encrypted Session</div>`;
+
+    if (!ONLINE) { appendMsgTo(cont, { sender: "System", text: "Demo mode — connect Firebase.", timestamp: Date.now() }, false, "system"); return; }
+
+    activeMsgRef = ref(db, `chats/${roomId}/messages`);
+    onValue(activeMsgRef, snap => {
+        const tag = cont.querySelector(".encrypted-tag");
+        cont.innerHTML = ""; if (tag) cont.appendChild(tag);
+        const data = snap.val(); if (!data) return;
+        Object.values(data).forEach(m => appendMsgTo(cont, m, m.sender === currentUser.name, m.mediaType));
+    });
+}
+
+// Wire user-layout controls (called once on user enter)
+function wireUserControls() {
+    const form = document.getElementById("user-chat-form");
+    const input = document.getElementById("user-message-input");
+    const fInput = document.getElementById("user-file-input");
+    const vBtn = document.getElementById("user-voice-btn");
+    const vnBtn = document.getElementById("user-vidnote-btn");
+    const mPrev = document.getElementById("user-media-preview");
+    const mLabel = document.getElementById("user-media-label");
+    const mCancel = document.getElementById("user-media-cancel");
+    const recBar = document.getElementById("user-recording-bar");
+    const recLbl = document.getElementById("user-recording-label");
+    const stopBtn = document.getElementById("user-stop-recording");
+    const cont = document.getElementById("user-messages-container");
+
+    const localShow = (el, d = "flex") => { el?.classList.remove("hidden"); if (el) el.style.display = d; };
+    const localHide = (el) => { el?.classList.add("hidden"); if (el) el.style.display = ""; };
+
+    let localBlob = null, localType = null;
+
+    fInput?.addEventListener("change", () => {
+        const f = fInput.files[0]; if (!f) return;
+        localBlob = f; localType = f.type.startsWith("image/") ? "image" : "video";
+        mLabel.textContent = `📎 ${f.name}`; localShow(mPrev, "flex"); fInput.value = "";
+    });
+    mCancel?.addEventListener("click", () => { localBlob = null; localType = null; localHide(mPrev); mLabel.textContent = ""; });
+
+    const doRecord = async (type) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia(
+                type === "video" ? { audio: true, video: { facingMode: "user", width: 320, height: 240 } } : { audio: true });
+            recordChunks = []; mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => recordChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                localBlob = new Blob(recordChunks, { type: type === "video" ? "video/webm" : "audio/webm" });
+                localType = type === "video" ? "vidnote" : "audio";
+                mLabel.textContent = type === "video" ? "🎥 Video note ready" : "🎙️ Voice note ready";
+                localShow(mPrev, "flex"); localHide(recBar); stream.getTracks().forEach(t => t.stop());
+            };
+            mediaRecorder.start(); recLbl.textContent = type === "video" ? "Recording video note…" : "Recording voice note…"; localShow(recBar, "flex");
+        } catch { alert("Camera/mic access denied."); }
+    };
+    vBtn?.addEventListener("click", () => doRecord("audio"));
+    vnBtn?.addEventListener("click", () => doRecord("video"));
+    stopBtn?.addEventListener("click", () => { if (mediaRecorder?.state !== "inactive") mediaRecorder.stop(); });
+
+    form?.addEventListener("submit", async e => {
+        e.preventDefault();
+        const text = input?.value.trim();
+        if (!text && !localBlob) return;
+        input.value = ""; input.style.height = "auto";
+
+        const payload = { sender: currentUser.name, timestamp: ONLINE ? serverTimestamp() : Date.now() };
+        if (localBlob) {
+            if (ONLINE) { const url = await uploadMedia(localBlob, localType); payload.mediaUrl = url; payload.mediaType = localType; }
+            else { payload.mediaUrl = URL.createObjectURL(localBlob); payload.mediaType = localType; }
+            localBlob = null; localType = null; localHide(mPrev); mLabel.textContent = "";
+        } else { payload.text = text; payload.mediaType = "text"; }
+
+        if (ONLINE) await push(ref(db, `chats/${currentRoomId}/messages`), payload);
+        else {
+            appendMsgTo(cont, payload, true, payload.mediaType);
+            setTimeout(() => appendMsgTo(cont, { sender: "Het Patel", text: "Hey! Demo mode — add Firebase config 😊", timestamp: Date.now() }, false, "text"), 900);
+        }
+    });
+}
+
+
+
+// ── APPEND MESSAGE (WhatsApp style) ──────────────────────
+function appendMsgTo(container, msg, isMe, type = "text") {
     const time = msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
     const wrap = document.createElement("div");
 
     if (type === "system") {
-        wrap.className = "flex justify-center";
-        wrap.innerHTML = `<span class="text-xs text-gray-500 italic py-1">${msg.text}</span>`;
-        msgContainer.appendChild(wrap); return;
+        wrap.className = "flex justify-center my-1";
+        wrap.innerHTML = `<span class="bg-black/40 text-gray-400 text-[11px] rounded-full px-3 py-1">${msg.text}</span>`;
+        container.appendChild(wrap); container.scrollTop = container.scrollHeight; return;
     }
 
-    wrap.className = `flex ${isMe ? "justify-end" : "justify-start"} gap-2`;
+    wrap.className = `flex ${isMe ? "justify-end" : "justify-start"} mb-0.5`;
+
     let content = "";
+    if (type === "image") content = `<img src="${msg.mediaUrl}" class="max-w-full max-h-52 rounded-lg object-cover cursor-pointer" onclick="window.open('${msg.mediaUrl}')">`;
+    else if (type === "video") content = `<video src="${msg.mediaUrl}" controls class="max-w-full max-h-48 rounded-lg"></video>`;
+    else if (type === "audio") content = `<div class="flex items-center gap-2"><svg class="w-5 h-5 opacity-70" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2H3v2a9 9 0 0 0 8 8.94V23h2v-2.06A9 9 0 0 0 21 12v-2z"/></svg><audio src="${msg.mediaUrl}" controls class="h-8 w-36" style="filter:invert(0.8)"></audio></div>`;
+    else if (type === "vidnote") content = `<video src="${msg.mediaUrl}" controls class="max-w-full max-h-40 rounded-lg"></video>`;
+    else content = `<p class="text-sm leading-relaxed whitespace-pre-wrap break-words">${escHtml(msg.text || "")}</p>`;
 
-    if (type === "image") content = `<img src="${msg.mediaUrl}" class="max-w-full max-h-48 rounded-xl object-cover cursor-pointer" onclick="window.open('${msg.mediaUrl}')">`;
-    else if (type === "video") content = `<video src="${msg.mediaUrl}" controls class="max-w-full max-h-48 rounded-xl"></video>`;
-    else if (type === "audio") content = `<audio src="${msg.mediaUrl}" controls class="w-48"></audio>`;
-    else if (type === "vidnote") content = `<video src="${msg.mediaUrl}" controls class="max-w-full max-h-40 rounded-xl"></video>`;
-    else content = `<p class="text-sm leading-relaxed whitespace-pre-wrap">${escHtml(msg.text || "")}</p>`;
-
-    const bubble = isMe
-        ? "bg-brand-purple/70 border border-brand-purple/40 rounded-2xl rounded-tr-sm text-white"
-        : "bg-white/[0.06] border border-white/[0.08] rounded-2xl rounded-tl-sm text-gray-200";
+    // WhatsApp bubble: green for me, dark for them
+    const sentBg = "bg-[#005c4b]";
+    const recvBg = "bg-[#1f2c34]";
 
     wrap.innerHTML = `
-    <div class="max-w-[78%] flex flex-col ${isMe ? "items-end" : "items-start"} gap-0.5">
-      ${!isMe ? `<span class="text-[10px] text-gray-500 px-1 font-mono">${msg.sender}</span>` : ""}
-      <div class="px-4 py-2.5 ${bubble}">${content}</div>
-      ${time ? `<span class="text-[10px] text-gray-600 px-1">${time}</span>` : ""}
+    <div class="max-w-[72%] flex flex-col">
+      <div class="${isMe ? sentBg : recvBg} rounded-lg ${isMe ? "rounded-tr-none" : "rounded-tl-none"} px-3 pt-1.5 pb-1 shadow-sm">
+        ${!isMe && !currentUser?.isAdmin ? `` : !isMe ? `<p class="text-[11px] font-bold text-brand-accent mb-0.5">${escHtml(msg.sender || "")}</p>` : ""}
+        <div class="text-[13.5px] text-white">${content}</div>
+        <div class="flex items-center justify-end gap-1 mt-0.5">
+          <span class="text-[10px] text-white/40">${time}</span>
+          ${isMe ? `<svg class="w-3.5 h-3.5 text-[#53bdeb]" fill="currentColor" viewBox="0 0 16 11"><path d="M11.071.653a.75.75 0 0 1 .014 1.06l-6.5 6.75a.75.75 0 0 1-1.08-.014L.653 5.097a.75.75 0 1 1 1.094-1.026l2.329 2.484 5.94-5.888a.75.75 0 0 1 1.055-.014zM15.803.653a.75.75 0 0 1 .014 1.06l-6.5 6.75a.75.75 0 0 1-1.055.014L6.47 6.75a.75.75 0 1 1 1.06-1.06l1.315 1.314L14.748.667a.75.75 0 0 1 1.055-.014z"/></svg>` : ""}
+        </div>
+      </div>
     </div>`;
 
-    msgContainer.appendChild(wrap);
-    msgContainer.scrollTop = msgContainer.scrollHeight;
+    container.appendChild(wrap);
+    container.scrollTop = container.scrollHeight;
 }
 
-function escHtml(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+function escHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
-// ── SEND ─────────────────────────────────────────────────
-chatForm.addEventListener("submit", async e => {
+
+// ── ADMIN SEND (uses messages-container) ──────────────────
+document.getElementById("chat-form")?.addEventListener("submit", async e => {
     e.preventDefault();
     const text = msgInput.value.trim();
     if (!text && !mediaBlob) return;
-    if (!currentRoomId && currentUser.isAdmin) return;
+    if (!currentRoomId) return;
+    msgInput.value = ""; msgInput.style.height = "auto";
 
-    msgInput.value = "";
-    resizeTextarea();
-
-    const payload = {
-        sender: currentUser.name,
-        timestamp: ONLINE ? serverTimestamp() : Date.now()
-    };
+    const cont = document.getElementById("messages-container");
+    const payload = { sender: currentUser.name, timestamp: ONLINE ? serverTimestamp() : Date.now() };
 
     if (mediaBlob) {
-        if (ONLINE) {
-            try {
-                const url = await uploadMedia(mediaBlob, mediaType);
-                payload.mediaUrl = url;
-                payload.mediaType = mediaType;
-            } catch (err) { console.error("Upload failed:", err); clearMedia(); return; }
-        } else {
-            payload.mediaUrl = URL.createObjectURL(mediaBlob);
-            payload.mediaType = mediaType;
-        }
+        if (ONLINE) { try { const url = await uploadMedia(mediaBlob, mediaType); payload.mediaUrl = url; payload.mediaType = mediaType; } catch (err) { clearMedia(); return; } }
+        else { payload.mediaUrl = URL.createObjectURL(mediaBlob); payload.mediaType = mediaType; }
         clearMedia();
-    } else {
-        payload.text = text;
-        payload.mediaType = "text";
-    }
+    } else { payload.text = text; payload.mediaType = "text"; }
 
-    if (ONLINE) {
-        await push(ref(db, `chats/${currentRoomId}/messages`), payload);
-    } else {
-        appendMsg(payload, true, payload.mediaType);
-        if (!currentUser.isAdmin) {
-            setTimeout(() => appendMsg({ sender: "Het Patel", text: "Hey! Demo mode — add Firebase config to chat.js 😊", timestamp: Date.now() }, false, "text"), 900);
-        }
-    }
+    if (ONLINE) await push(ref(db, `chats/${currentRoomId}/messages`), payload);
+    else appendMsgTo(cont, payload, true, payload.mediaType);
 });
+
 
 // ── UPLOAD MEDIA ─────────────────────────────────────────
 async function uploadMedia(blob, type) {
@@ -442,8 +528,13 @@ async function startRecording(type) {
 stopRecBtn.addEventListener("click", () => { if (mediaRecorder?.state !== "inactive") mediaRecorder.stop(); });
 
 // ── AUTO-RESIZE TEXTAREA ─────────────────────────────────
-msgInput?.addEventListener("input", resizeTextarea);
-function resizeTextarea() { msgInput.style.height = "auto"; msgInput.style.height = Math.min(msgInput.scrollHeight, 112) + "px"; }
+["message-input", "user-message-input"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("input", () => {
+        el.style.height = "auto";
+        el.style.height = Math.min(el.scrollHeight, 112) + "px";
+    });
+});
 
 // ── ADMIN: ALL USERS + LOCATION ──────────────────────────
 function listenForAllUsers() {
@@ -452,22 +543,52 @@ function listenForAllUsers() {
 }
 
 function renderAdminUsers(users) {
-    adminUserList.innerHTML = `<span class="text-[10px] font-bold text-brand-purple uppercase tracking-widest mr-1">Sessions:</span>`;
+    const list = document.getElementById("admin-user-list");
+    list.innerHTML = "";
     Object.entries(users).forEach(([code, data]) => {
-        if (code === "HELAPA" || data.role === "admin") return;
+        if (data.role === "admin") return;
         const roomId = `room_${code.toLowerCase()}`;
         const isActive = currentRoomId === roomId;
-        const btn = document.createElement("button");
-        btn.className = `px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all flex-shrink-0 ${isActive ? "bg-brand-accent text-white border-brand-accent" : "bg-white/5 text-gray-400 border-white/10 hover:border-white/30"}`;
-        btn.innerHTML = `${data.name} <span class="opacity-50 font-mono">#${code}</span>`;
-        btn.onclick = () => {
+        const initial = (data.name || "?")[0].toUpperCase();
+        const colors = ["from-purple-500 to-pink-500", "from-blue-500 to-cyan-400", "from-green-500 to-teal-400", "from-amber-500 to-orange-400"];
+        const color = colors[code.charCodeAt(0) % colors.length];
+
+        const card = document.createElement("button");
+        card.className = `contact-card w-full flex items-center gap-2.5 px-2 py-2 rounded-xl transition-all text-left ${isActive ? "bg-brand-purple/20 border border-brand-purple/30" : "hover:bg-white/[0.04] border border-transparent"
+            }`;
+        card.dataset.name = data.name;
+        card.dataset.code = code;
+        card.innerHTML = `
+      <div class="relative flex-shrink-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-xs font-bold text-white">${initial}</div>
+        <span class="loc-dot-${code} absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-gray-600 border border-[#0a0a14] hidden" title="Location tracked"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-white truncate">${data.name}</p>
+        <p class="text-[10px] text-gray-500 font-mono truncate">#${code}</p>
+      </div>`;
+
+        card.onclick = () => {
             currentRoomId = roomId;
-            headerName.textContent = `${data.name}`;
+            // Update header
+            document.getElementById("admin-contact-name").textContent = data.name;
+            document.getElementById("admin-contact-sub").textContent = `#${code}`;
+            document.getElementById("admin-contact-avatar").textContent = initial;
             listenMessages(currentRoomId);
             showUserLocation(code, data.name);
             renderAdminUsers(users);
         };
-        adminUserList.appendChild(btn);
+        list.appendChild(card);
+
+        // Check if location exists and show green dot
+        if (ONLINE) {
+            get(ref(db, `locations/${code}`)).then(snap => {
+                if (snap.exists()) {
+                    card.querySelector(`.loc-dot-${code}`)?.classList.replace("bg-gray-600", "bg-green-400");
+                    card.querySelector(`.loc-dot-${code}`)?.classList.remove("hidden");
+                }
+            });
+        }
     });
 }
 
