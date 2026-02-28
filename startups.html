@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Startups & Work | Het Patel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#050505',
+                            purple: '#7c3aed',
+                            blue: '#2563eb',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 15s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body
+    class="bg-brand-dark text-white font-sans antialiased selection:bg-brand-purple selection:text-white overflow-x-hidden min-h-screen">
+
+    <div class="noise-bg"></div>
+
+    <div
+        class="custom-cursor hidden md:block z-[100] fixed w-5 h-5 border-2 border-brand-accent rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2">
+    </div>
+    <div
+        class="custom-cursor-dot hidden md:block z-[100] fixed w-1 h-1 bg-brand-accent rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2">
+    </div>
+
+    <div
+        class="orb fixed top-[-10%] left-[-10%] w-[50vh] h-[50vh] bg-brand-purple rounded-full mix-blend-screen filter blur-[120px] opacity-30">
+    </div>
+    <div
+        class="orb fixed bottom-[10%] right-[-10%] w-[60vh] h-[60vh] bg-brand-accent rounded-full mix-blend-screen filter blur-[150px] opacity-20">
+    </div>
+
+    <nav class="absolute w-full z-40 top-0 py-8" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="index.html"
+                class="text-2xl font-black tracking-tighter mix-blend-difference nav-item magnetic inline-block p-2">HET.</a>
+            <div class="hidden md:flex gap-10 text-sm font-medium text-gray-400 nav-item">
+                <a href="index.html#about" class="hover:text-white transition-colors">About</a>
+                <a href="startups.html" class="text-white transition-colors font-bold">Work</a>
+                <a href="index.html#contact" class="hover:text-white transition-colors">Contact</a>
+            </div>
+            <div class="nav-item">
+                <a href="index.html#contact"
+                    class="magnetic px-6 py-2.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-sm font-medium hover:bg-white/10 hover:border-white/40 transition-all duration-300 inline-block">
+                    Let's Talk
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 min-h-screen pt-40 pb-20 px-6 max-w-7xl mx-auto">
+        <div class="mb-20">
+            <a href="index.html"
+                class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group overflow-hidden page-element">
+                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back Home</span>
+            </a>
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 overflow-hidden page-title">
+                <span class="inline-block title-span">My <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-blue">Ventures.</span></span>
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-400 max-w-3xl page-desc">From hardware prototypes to cloud-native
+                platforms, here are the startups and projects I've built from the ground up.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <a href="startup-iot.html"
+                class="startup-card group relative block overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.015] backdrop-blur-md p-10 cursor-pointer magnetic-card">
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-brand-accent/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                </div>
+                <div
+                    class="absolute -right-20 -top-20 w-64 h-64 bg-brand-accent/20 rounded-full blur-[60px] group-hover:scale-150 transition-transform duration-1000">
+                </div>
+
+                <div class="relative z-10 flex flex-col h-full justify-between min-h-[300px]">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center text-brand-accent mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                            </path>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <h2 class="text-4xl font-bold group-hover:text-brand-accent transition-colors">IoT Ecosystem
+                            </h2>
+                            <span class="px-3 py-1 text-xs font-bold rounded-full bg-white/10 text-white">2024 -
+                                Present</span>
+                        </div>
+                        <p class="text-xl text-gray-400">Next-generation hardware automation interface bridging local
+                            edge devices with cloud analytics.</p>
+
+                        <div
+                            class="mt-8 flex items-center text-brand-accent font-medium gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                            Read case study <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+            <a href="startup-saas.html"
+                class="startup-card group relative block overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.015] backdrop-blur-md p-10 cursor-pointer magnetic-card mt-0 md:mt-16">
+                <div
+                    class="absolute inset-0 bg-gradient-to-tr from-brand-purple/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                </div>
+                <div
+                    class="absolute -left-20 -bottom-20 w-64 h-64 bg-brand-purple/20 rounded-full blur-[60px] group-hover:scale-150 transition-transform duration-1000">
+                </div>
+
+                <div class="relative z-10 flex flex-col h-full justify-between min-h-[300px]">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center text-brand-purple mb-8 group-hover:scale-110 transition-transform duration-500">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
+                            </path>
+                        </svg>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <h2 class="text-4xl font-bold group-hover:text-brand-purple transition-colors">SaaS Platform
+                            </h2>
+                            <span
+                                class="px-3 py-1 text-xs font-bold rounded-full bg-white/10 text-white">Acquired</span>
+                        </div>
+                        <p class="text-xl text-gray-400">High-performance data aggregation platform managing billions of
+                            rows of user metrics.</p>
+
+                        <div
+                            class="mt-8 flex items-center text-brand-purple font-medium gap-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                            Read case study <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="w-full py-8 text-center text-gray-600 border-t border-white/5 relative z-10 mt-20">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>&copy; 2026 Het Patel. All rights reserved.</p>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white transition-colors relative group"><span
+                        class="relative z-10">GitHub</span><span
+                        class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+                <a href="#" class="hover:text-white transition-colors relative group"><span
+                        class="relative z-10">LinkedIn</span><span
+                        class="absolute -bottom-1 left-0 w-full h-[1px] bg-white scale-x-0 origin-left transition-transform duration-300 group-hover:scale-x-100"></span></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

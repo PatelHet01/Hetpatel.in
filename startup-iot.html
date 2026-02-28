@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Ecosystem | Het Patel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#050505',
+                            purple: '#7c3aed',
+                            blue: '#2563eb',
+                            accent: '#38bdf8'
+                        }
+                    },
+                    animation: {
+                        'spin-slow': 'spin 15s linear infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body
+    class="bg-brand-dark text-white font-sans antialiased selection:bg-brand-accent selection:text-white overflow-x-hidden min-h-screen">
+
+    <div class="noise-bg"></div>
+
+    <div
+        class="custom-cursor hidden md:block z-[100] fixed w-5 h-5 border-2 border-brand-accent rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2">
+    </div>
+    <div
+        class="custom-cursor-dot hidden md:block z-[100] fixed w-1 h-1 bg-brand-accent rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2">
+    </div>
+
+    <div
+        class="orb fixed top-[-20%] left-[20%] w-[80vh] h-[80vh] bg-brand-accent rounded-full mix-blend-screen filter blur-[150px] opacity-20">
+    </div>
+
+    <nav class="absolute w-full z-40 top-0 py-8" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="index.html"
+                class="text-2xl font-black tracking-tighter mix-blend-difference nav-item magnetic inline-block p-2">HET.</a>
+            <div class="hidden md:flex gap-10 text-sm font-medium text-gray-400 nav-item">
+                <a href="index.html#about" class="hover:text-white transition-colors">About</a>
+                <a href="startups.html" class="text-white transition-colors font-bold">Work</a>
+                <a href="index.html#contact" class="hover:text-white transition-colors">Contact</a>
+            </div>
+            <div class="nav-item">
+                <a href="index.html#contact"
+                    class="magnetic px-6 py-2.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-sm font-medium hover:bg-white/10 hover:border-white/40 transition-all duration-300 inline-block">
+                    Let's Talk
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10">
+
+        <!-- Hero Section -->
+        <header class="min-h-[80vh] pt-40 px-6 max-w-7xl mx-auto flex flex-col justify-center">
+            <a href="startups.html"
+                class="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group overflow-hidden page-element">
+                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back to Ventures</span>
+            </a>
+
+            <div class="flex items-center gap-4 mb-6 page-element">
+                <div
+                    class="w-12 h-12 rounded-xl bg-brand-accent/20 border border-brand-accent/30 flex items-center justify-center text-brand-accent">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z">
+                        </path>
+                    </svg>
+                </div>
+                <span
+                    class="px-4 py-1.5 text-sm font-bold uppercase tracking-wider rounded-full bg-white/5 border border-white/10 text-gray-300">Hardware
+                    & Edge</span>
+            </div>
+
+            <h1 class="text-5xl md:text-[5rem] font-black tracking-tight leading-[1] mb-8 overflow-hidden page-title">
+                <span
+                    class="inline-block title-span text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Next-Gen</span><br />
+                <span
+                    class="inline-block title-span text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-blue">IoT
+                    Ecosystem.</span>
+            </h1>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mt-12 mb-20">
+                <div
+                    class="col-span-2 space-y-6 text-xl md:text-2xl text-gray-400 font-light leading-relaxed page-desc">
+                    <div class="desc-line inline-block">When dealing with distributed hardware sensors, latency and data
+                        integrity are the hardest problems. I built an ecosystem from the PCB up to the cloud.</div>
+                    <div class="desc-line inline-block">The system aggregates millions of data points a day using Rust
+                        on the edge and highly concurrent Go microservices in the cloud, all manageable via an intuitive
+                        frontend.</div>
+                </div>
+
+                <div class="space-y-6 border-l border-white/10 pl-8 page-element">
+                    <div>
+                        <h4 class="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Role</h4>
+                        <p class="text-xl font-medium">Founder & Primary Architect</p>
+                    </div>
+                    <div>
+                        <h4 class="text-sm uppercase tracking-widest text-gray-500 font-bold mb-2">Tech Stack</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-sm">C++ /
+                                Rust</span>
+                            <span class="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-sm">Golang</span>
+                            <span class="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-sm">NextJS</span>
+                            <span
+                                class="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-sm">TimescaleDB</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Image/Demo Section -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+            <div
+                class="w-full h-[60vh] rounded-[2rem] border border-white/10 bg-gradient-to-br from-brand-dark to-[#0a0f1c] relative overflow-hidden flex items-center justify-center p-8 mt-10 scroll-reveal">
+                <!-- Abstract visual representation since no image src is provided -->
+                <div
+                    class="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px] opacity-30">
+                </div>
+                <div class="absolute w-full h-[1px] bg-brand-accent/50 top-1/2 left-0 shadow-[0_0_20px_#38bdf8]"></div>
+
+                <div class="relative z-10 flex gap-8 items-center w-full justify-between max-w-4xl">
+                    <div class="w-32 h-40 bg-zinc-900 border border-zinc-700 rounded-xl relative overflow-hidden">
+                        <div class="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                        <div class="absolute bottom-4 left-4 right-4 h-1 bg-zinc-800 rounded overflow-hidden">
+                            <div class="h-full bg-brand-accent w-1/3"></div>
+                        </div>
+                    </div>
+                    <div
+                        class="h-[2px] w-full bg-gradient-to-r from-transparent via-brand-accent/40 to-transparent relative overflow-hidden">
+                        <div
+                            class="absolute top-0 left-0 w-1/4 h-full bg-brand-accent shadow-[0_0_10px_#38bdf8] animate-[moveRight_2s_linear_infinite]">
+                        </div>
+                    </div>
+                    <div
+                        class="w-48 h-32 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl flex flex-col items-center justify-center">
+                        <svg class="w-10 h-10 text-brand-blue mb-2" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z">
+                            </path>
+                        </svg>
+                        <span class="text-sm font-mono text-gray-400">Cloud Sync</span>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                @keyframes moveRight {
+                    0% {
+                        left: -25%;
+                    }
+
+                    100% {
+                        left: 100%;
+                    }
+                }
+            </style>
+        </section>
+
+        <section class="max-w-4xl mx-auto px-6 py-20 space-y-16">
+            <div class="scroll-reveal">
+                <h3 class="text-3xl font-bold mb-6 text-white border-b border-white/10 pb-4 inline-block">The Problem
+                </h3>
+                <p class="text-xl text-gray-400 leading-relaxed">
+                    Existing sensor networks rely on heavily fragmented protocols. Manufacturers lock you into closed
+                    ecosystems preventing unified dashboarding. The latency was high, and provisioning new edge devices
+                    took days.
+                </p>
+            </div>
+
+            <div class="scroll-reveal">
+                <h3 class="text-3xl font-bold mb-6 text-white border-b border-white/10 pb-4 inline-block">The Solution
+                </h3>
+                <p class="text-xl text-gray-400 leading-relaxed">
+                    I engineered a custom lightweight protocol over MQTT that auto-discovers nodes on the network. The
+                    backend seamlessly maps varying data structures into a unified Time-Series schema. As a result,
+                    deployment time went from days to literally bridging the device to power.
+                </p>
+            </div>
+        </section>
+
+        <!-- Next Project CTA -->
+        <a href="startup-saas.html"
+            class="block w-full border-t border-white/10 py-32 group hover:bg-white/[0.02] transition-colors relative overflow-hidden mt-10">
+            <div
+                class="absolute inset-0 bg-gradient-to-r from-transparent via-brand-purple/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
+            </div>
+            <div class="max-w-7xl mx-auto px-6 text-center">
+                <span class="text-sm font-bold tracking-widest uppercase text-gray-500 mb-4 block">Next Venture</span>
+                <h2
+                    class="text-6xl md:text-8xl font-black group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-brand-purple group-hover:to-brand-blue transition-all duration-500">
+                    SaaS Platform &rarr;
+                </h2>
+            </div>
+        </a>
+    </main>
+
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
