@@ -540,14 +540,22 @@ document.getElementById("stop-recording")?.addEventListener("click", () => {
     if (mediaRecorder?.state !== "inactive") mediaRecorder.stop();
 });
 
-// ── AUTO-RESIZE TEXTAREA ─────────────────────────────────
+// ── AUTO-RESIZE + ENTER-TO-SEND TEXTAREAS ─────────────────
 ["message-input", "user-message-input"].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener("input", () => {
+    if (!el) return;
+    el.addEventListener("input", () => {
         el.style.height = "auto";
         el.style.height = Math.min(el.scrollHeight, 112) + "px";
     });
+    el.addEventListener("keydown", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            el.closest("form")?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+        }
+    });
 });
+
 
 // ── ADMIN: ALL USERS + LOCATION ──────────────────────────
 function listenForAllUsers() {
@@ -609,20 +617,41 @@ function renderAdminUsers(users) {
 async function showUserLocation(code, name) {
     if (!ONLINE) return;
     const snap = await get(ref(db, `locations/${code}`));
-    if (!snap.exists()) return;
+    // Show location panel in sidebar
+    const locPanel = document.getElementById("admin-location-panel");
+    if (!snap.exists()) {
+        if (locPanel) locPanel.innerHTML = `<p class="text-[11px] text-gray-500 px-2 py-1">No location data for ${name}.</p>`;
+        return;
+    }
     const loc = snap.val();
-    const ts = loc.timestamp ? new Date(loc.timestamp).toLocaleString() : "unknown";
-    // Inject location notice at top of messages (admin only)
+    const ts = loc.timestamp ? new Date(loc.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + " " + new Date(loc.timestamp).toLocaleDateString() : "unknown";
+    const lat = loc.lat?.toFixed(5), lng = loc.lng?.toFixed(5);
+    const acc = loc.accuracy ? Math.round(loc.accuracy) + "m" : "?";
+    const mapThumb = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=14&size=300x120&markers=color:red%7C${lat},${lng}&key=`;
+    if (locPanel) locPanel.innerHTML = `
+      <div class="mx-2 my-1 rounded-xl overflow-hidden border border-green-500/20">
+        <a href="${loc.mapsUrl}" target="_blank"
+           class="block w-full bg-[#0d1f1a] hover:bg-[#0f2820] transition-colors px-3 py-2">
+          <div class="flex items-center gap-2 mb-1">
+            <svg class="w-3 h-3 text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="text-[11px] font-bold text-green-300">${name}'s Location</span>
+          </div>
+          <p class="text-[10px] text-green-200/70 font-mono">${lat}, ${lng}</p>
+          <p class="text-[10px] text-gray-500">Accuracy: ${acc} &nbsp;·&nbsp; ${ts}</p>
+          <p class="text-[10px] text-green-400 mt-0.5 underline">Open in Google Maps →</p>
+        </a>
+      </div>`;
+    // Also show at top of messages
+    const cont = document.getElementById("messages-container");
+    cont?.querySelectorAll(".loc-notice").forEach(el => el.remove());
     const locDiv = document.createElement("div");
-    locDiv.className = "flex justify-center my-2";
-    locDiv.innerHTML = `
-    <a href="${loc.mapsUrl}" target="_blank" class="inline-flex items-center gap-2 bg-green-900/30 border border-green-500/20 rounded-full px-4 py-1.5 text-xs text-green-300 hover:bg-green-900/50 transition-colors">
-      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      ${name}'s last location · ${ts} · Open in Maps
-    </a>`;
-    const encrypted = msgContainer.querySelector(".encrypted-tag");
-    if (encrypted) encrypted.insertAdjacentElement("afterend", locDiv);
-    else msgContainer.insertAdjacentElement("afterbegin", locDiv);
+    locDiv.className = "loc-notice flex justify-center my-1";
+    locDiv.innerHTML = `<a href="${loc.mapsUrl}" target="_blank"
+      class="inline-flex items-center gap-1.5 bg-green-900/30 border border-green-500/20 rounded-full px-3 py-1 text-[11px] text-green-300 hover:bg-green-900/50">
+      📍 ${name} · ${lat}, ${lng} · ${ts} → Maps</a>`;
+    const enc = cont?.querySelector(".encrypted-tag");
+    if (enc) enc.insertAdjacentElement("afterend", locDiv);
+    else cont?.insertAdjacentElement("afterbegin", locDiv);
 }
 
 // ── ASSIGN CODE ──────────────────────────────────────────
@@ -644,36 +673,45 @@ assignCodeBtn?.addEventListener("click", async () => {
     if (!ONLINE) listenForAllUsers();
 });
 
-// ── WEBRTC CALLS (PeerJS) ────────────────────────────────
-// PeerJS loaded via CDN in index.html
+// ── WEBRTC CALLS (PeerJS) ─────────────────────────────────
 function initPeer(peerId) {
     if (typeof Peer === "undefined") return;
-    peer = new Peer(peerId.replace(/[^a-z0-9\-_]/gi, "_"), {
-        host: "0.peerjs.com", port: 443, path: "/", secure: true
+    const cleanId = peerId.replace(/[^a-z0-9\-_]/gi, "_");
+    peer = new Peer(cleanId, { host: "0.peerjs.com", port: 443, path: "/", secure: true });
+
+    peer.on("open", id => {
+        // Store peer ID in Firebase so the other party can call us
+        if (ONLINE && currentUser?.code)
+            set(ref(db, `peerIds/${currentUser.code}`), id);
     });
 
-    // Incoming call
     peer.on("call", call => {
         const type = call.metadata?.type || "audio";
         const accept = confirm(`📞 Incoming ${type} call from ${call.metadata?.name || "someone"}. Accept?`);
         if (!accept) { call.close(); return; }
-
         navigator.mediaDevices.getUserMedia({ audio: true, video: type === "video" })
-            .then(stream => {
-                call.answer(stream);
-                handleCallStream(call, stream, type);
-            });
+            .then(stream => { call.answer(stream); handleCallStream(call, stream, type); })
+            .catch(() => alert("Mic/camera access denied."));
     });
 }
 
-// Admin initiates call
-window.startCall = function (callType) {
-    if (!peer || !currentRoomId) return;
-    const targetPeerId = currentRoomId.replace("room_", "") + "_peer";
+// Admin initiates call — look up user peer ID from Firebase
+window.startCall = async function (callType) {
+    if (!peer) { alert("Call system not ready."); return; }
+    if (!currentRoomId) { alert("Select a contact first."); return; }
+    const code = currentRoomId.replace("room_", "");
+
+    let targetPeerId = null;
+    if (ONLINE) {
+        const snap = await get(ref(db, `peerIds/${code.toUpperCase()}`));
+        if (snap.exists()) targetPeerId = snap.val();
+    }
+    if (!targetPeerId) { alert("Contact is not online right now."); return; }
 
     navigator.mediaDevices.getUserMedia({ audio: true, video: callType === "video" })
         .then(stream => {
             const call = peer.call(targetPeerId, stream, { metadata: { type: callType, name: "Het Patel" } });
+            call.on("error", e => { alert("Call failed: " + e); endCall(); });
             handleCallStream(call, stream, callType);
         })
         .catch(() => alert("Camera/mic access needed for calls."));
@@ -681,25 +719,24 @@ window.startCall = function (callType) {
 
 function handleCallStream(call, localStream, type) {
     activeCall = call;
-    show(callBar, "flex");
+    const bar = document.getElementById(currentUser?.isAdmin ? "call-bar" : "user-call-bar");
+    if (bar) { bar.classList.remove("hidden"); bar.style.display = "flex"; }
 
     call.on("stream", remoteStream => {
         let el = document.getElementById("remote-media");
         if (!el) {
             el = document.createElement(type === "video" ? "video" : "audio");
-            el.id = "remote-media"; el.autoplay = true;
-            if (type === "video") el.className = "w-full max-h-40 rounded-xl object-cover mt-1";
-            callBar.appendChild(el);
+            el.id = "remote-media"; el.autoplay = true; el.playsinline = true;
+            if (type === "video") el.className = "fixed bottom-20 right-4 w-48 h-36 rounded-xl object-cover z-50 shadow-2xl border border-white/10";
+            document.body.appendChild(el);
         }
         el.srcObject = remoteStream;
     });
-
     call.on("close", endCall);
 }
 
 window.endCall = function () {
-    activeCall?.close();
-    activeCall = null;
-    document.getElementById("remote-media")?.remove();
-    hide(callBar);
+    activeCall?.close(); activeCall = null;
+    const remEl = document.getElementById("remote-media"); remEl?.remove();
+    ["call-bar", "user-call-bar"].forEach(id => hide(document.getElementById(id)));
 };
