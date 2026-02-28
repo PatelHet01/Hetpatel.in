@@ -627,14 +627,21 @@ async function showUserLocation(code, name) {
 
 // ── ASSIGN CODE ──────────────────────────────────────────
 assignCodeBtn?.addEventListener("click", async () => {
-    const name = document.getElementById("new-code-name")?.value.trim();
-    const code = document.getElementById("new-code-val")?.value.trim().toUpperCase();
-    if (!name || !code) return;
-    if (ONLINE) await set(ref(db, `authorizedUsers/${code}`), { name });
-    show(assignFeedback, "inline");
-    document.getElementById("new-code-name").value = "";
-    document.getElementById("new-code-val").value = "";
-    setTimeout(() => hide(assignFeedback), 2500);
+    const nameEl = document.getElementById("new-code-name");
+    const codeEl = document.getElementById("new-code-val");
+    const fbEl = document.getElementById("assign-feedback");
+    const name = nameEl?.value.trim();
+    const code = codeEl?.value.trim().toUpperCase();
+    if (!name || !code) { alert("Enter both name and code."); return; }
+    try {
+        if (ONLINE) await set(ref(db, `authorizedUsers/${code}`), { name });
+    } catch (e) { console.warn("Firebase write failed:", e.message); }
+    // Always show feedback and clear fields
+    if (nameEl) nameEl.value = "";
+    if (codeEl) codeEl.value = "";
+    if (fbEl) { fbEl.classList.remove("hidden"); fbEl.style.display = "inline"; setTimeout(() => { fbEl.classList.add("hidden"); fbEl.style.display = ""; }, 2500); }
+    // Refresh contact list locally if offline
+    if (!ONLINE) listenForAllUsers();
 });
 
 // ── WEBRTC CALLS (PeerJS) ────────────────────────────────
