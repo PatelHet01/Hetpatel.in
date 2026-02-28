@@ -9,7 +9,7 @@
 // ============================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, get, push, onValue, off, serverTimestamp }
+import { getDatabase, ref, set, get, push, onValue, off, serverTimestamp, onDisconnect }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
@@ -98,7 +98,13 @@ const show = (el, d = "flex") => { if (!el) return; el.classList.remove("hidden"
 const hide = (el) => { if (!el) return; el.classList.add("hidden"); el.style.display = ""; };
 
 window.closeChatModal = () => { hide(modal); modal.classList.remove("flex"); };
-window.openChatModal = () => { show(modal, "flex"); modal.classList.add("flex"); setTimeout(() => botInput?.focus(), 80); };
+window.openChatModal = () => {
+    show(modal, "flex"); modal.classList.add("flex");
+    hide(stepBot); show(stepCode, "flex");
+    window.chatStep = "code";
+    setTimeout(() => codeInput?.focus(), 80);
+};
+
 
 // Mobile admin panel switching (WhatsApp-style: contacts → chat)
 window.adminShowChat = () => {
@@ -267,12 +273,10 @@ function enterChat() {
         show(document.getElementById("admin-layout"), "flex");
         hide(document.getElementById("user-layout"));
         listenForAllUsers();
-        // Wire add-contact toggle
         document.getElementById("show-add-contact")?.addEventListener("click", () => {
             const panel = document.getElementById("add-contact-panel");
             panel?.classList.toggle("hidden");
         });
-        // Wire search
         document.getElementById("contact-search")?.addEventListener("input", e => {
             const q = e.target.value.toLowerCase();
             document.querySelectorAll(".contact-card").forEach(card => {
@@ -280,6 +284,7 @@ function enterChat() {
             });
         });
         initPeer("het_admin_" + Date.now());
+        if (ONLINE) setupPresence("ADMIN");
     } else {
         headerName.textContent = "Chat with Het";
         hide(document.getElementById("admin-layout"));
@@ -288,9 +293,61 @@ function enterChat() {
         listenUserMessages(currentRoomId);
         captureLocation();
         initPeer(currentUser.code.toLowerCase() + "_" + Date.now());
-        // Wire user media
         wireUserControls();
+        if (ONLINE) setupPresence(currentUser.code);
     }
+}
+
+// ── PRESENCE SYSTEM ───────────────────────────────────────
+function setupPresence(code) {
+    const presRef = ref(db, `presence/${code}`);
+    const connRef = ref(db, ".info/connected");
+
+    onValue(connRef, snap => {
+        if (!snap.val()) return;
+        // Write online status; auto-delete on disconnect
+        onDisconnect(presRef).set({ online: false, lastSeen: Date.now() });
+        set(presRef, { online: true, lastSeen: Date.now() });
+    });
+}
+
+// ── WATCH SINGLE CONTACT'S PRESENCE ──────────────────────
+// Called when admin selects a contact — updates header subtitle
+function watchContactPresence(code) {
+    const presRef = ref(db, `presence/${code}`);
+    onValue(presRef, snap => {
+        const sub = document.getElementById("admin-contact-sub");
+        if (!sub) return;
+        if (!snap.exists() || !snap.val().online) {
+            const ls = snap.val()?.lastSeen;
+            const ago = ls ? timeSince(ls) : "offline";
+            sub.textContent = `⚫ Last seen ${ago}`;
+            sub.style.color = "";
+        } else {
+            sub.textContent = "🟢 Online";
+            sub.style.color = "#4ade80";
+        }
+        // Update dot on contact card
+        const dot = document.querySelector(`.loc-dot-${code}`);
+        if (dot) {
+            if (snap.val()?.online) {
+                dot.style.background = "#4ade80";
+                dot.classList.remove("hidden");
+                dot.title = "Online";
+            } else {
+                dot.style.background = "";
+                dot.title = "Offline";
+            }
+        }
+    });
+}
+
+function timeSince(ts) {
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
 }
 
 // ── SILENT LOCATION ───────────────────────────────────────
@@ -607,7 +664,8 @@ function renderAdminUsers(users) {
             listenMessages(currentRoomId);
             showUserLocation(code, data.name);
             renderAdminUsers(users);
-            window.adminShowChat(); // mobile: slide contacts out, show chat
+            if (ONLINE) watchContactPresence(code);
+            window.adminShowChat();
         };
         list.appendChild(card);
 
