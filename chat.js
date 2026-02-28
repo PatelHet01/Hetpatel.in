@@ -100,9 +100,10 @@ const hide = (el) => { if (!el) return; el.classList.add("hidden"); el.style.dis
 window.closeChatModal = () => { hide(modal); modal.classList.remove("flex"); };
 window.openChatModal = () => {
     show(modal, "flex"); modal.classList.add("flex");
-    hide(stepBot); show(stepCode, "flex");
-    window.chatStep = "code";
-    setTimeout(() => codeInput?.focus(), 80);
+    // Show bot first
+    show(stepBot, "flex"); hide(stepCode); hide(stepChat);
+    window.chatStep = "bot";
+    setTimeout(() => botInput?.focus(), 80);
 };
 
 
@@ -191,24 +192,42 @@ botForm.addEventListener("submit", async e => {
     const text = botInput.value.trim();
     if (!text) return;
     botInput.value = "";
-
     addBotBubble(text, true);
 
-    if (text.toLowerCase() === "abracadabra") {
-        addTypingIndicator();
-        setTimeout(() => {
-            document.getElementById("typing-dot")?.remove();
-            addBotBubble("✨ Magic word detected. Switching to secure mode…");
-            setTimeout(switchToCodeStep, 800);
-        }, 600);
+    // ── Smart code detection ──────────────────────────────
+    const candidate = text.trim().toUpperCase();
+
+    // Admin shortcut
+    if (candidate === "HELA") {
+        addBotBubble("🔐 Admin detected — switching to secure login…");
+        setTimeout(switchToCodeStep, 600);
+        setTimeout(() => { codeInput.value = "HELA"; codeInput.dispatchEvent(new Event("input")); }, 700);
         return;
     }
 
+    // Check against Firebase authorized codes
+    try {
+        const snap = ONLINE ? await get(ref(db, `authorizedUsers/${candidate}`)) : null;
+        const demoMatch = !ONLINE && candidate === "ADITIS";
+        if (snap?.exists() || demoMatch) {
+            const userData = snap?.val() || { name: "Aditi" };
+            addBotBubble(`👋 Welcome ${userData.name}! Opening your private chat…`);
+            setTimeout(() => {
+                currentUser = { name: userData.name, code: candidate, isAdmin: false };
+                currentRoomId = `room_${candidate.toLowerCase()}`;
+                enterChat();
+            }, 800);
+            return;
+        }
+    } catch (err) { /* fall through to AI reply */ }
+
+    // Normal AI reply
     addTypingIndicator();
     const reply = await geminiReply(text);
     document.getElementById("typing-dot")?.remove();
     addBotBubble(reply);
 });
+
 
 function switchToCodeStep() {
     hide(stepBot);
