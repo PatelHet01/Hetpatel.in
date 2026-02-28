@@ -42,6 +42,16 @@
     <!-- Film Grain Overlay -->
     <div class="noise-bg"></div>
 
+    <!-- ── PRELOADER ── -->
+    <div id="preloader" class="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#05050f]">
+        <div id="pre-logo" class="text-white font-black tracking-[-0.04em] text-6xl md:text-8xl overflow-hidden">
+            <span id="pre-name" style="display:inline-block;transform:translateY(100%)">HET.</span>
+        </div>
+        <div id="pre-bar" class="mt-6 h-[1px] bg-brand-purple/60 w-0 max-w-[180px]"></div>
+        <p id="pre-sub" class="mt-4 text-brand-accent/0 text-xs font-mono tracking-[0.3em] uppercase">founder · builder
+        </p>
+    </div>
+
     <!-- Custom Cursor -->
     <div
         class="custom-cursor hidden md:block z-[100] fixed w-5 h-5 border-2 border-brand-accent rounded-full pointer-events-none transform -translate-x-1/2 -translate-y-1/2">
@@ -71,12 +81,7 @@
                 <a href="startups.html" class="hover:text-white transition-colors">Work</a>
                 <a href="#contact" class="hover:text-white transition-colors">Contact</a>
             </div>
-            <div class="nav-item">
-                <a href="#contact"
-                    class="magnetic px-6 py-2.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md text-sm font-medium hover:bg-white/10 hover:border-white/40 transition-all duration-300 inline-block">
-                    Let's Talk
-                </a>
-            </div>
+
         </div>
     </nav>
 
@@ -141,8 +146,7 @@
                     </div>
                     <div
                         class="overflow-hidden rounded-full p-1 border border-white/20 hover:border-white/40 transition-all duration-300">
-                        <button
-                            onclick="document.getElementById('chat-modal').classList.remove('hidden'); document.getElementById('chat-modal').classList.add('flex'); setTimeout(() => document.getElementById('username-input').focus(), 100);"
+                        <button onclick="window.openChatModal()"
                             class="magnetic inline-block px-8 py-4 bg-transparent backdrop-blur-md font-bold text-lg hover:bg-white/5 transition-all duration-300 cursor-pointer text-white relative z-50 rounded-full">
                             Let's Talk
                         </button>
@@ -155,6 +159,60 @@
                 class="scroll-indicator absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 opacity-60 z-10 pointer-events-none">
                 <span class="text-xs tracking-widest uppercase font-medium">Scroll down</span>
                 <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+            </div>
+        </section>
+
+        <!-- ── LIVE EXPERIENCE COUNTER ── -->
+        <section
+            class="relative z-10 py-16 px-6 border-y border-white/[0.06] bg-gradient-to-br from-brand-purple/5 via-transparent to-brand-accent/5 overflow-hidden">
+            <!-- Grid bg -->
+            <div class="absolute inset-0 grid-lines opacity-60 pointer-events-none"></div>
+            <div class="max-w-4xl mx-auto text-center scroll-reveal">
+                <p class="text-[11px] font-mono tracking-[0.35em] text-brand-accent uppercase mb-3 opacity-70">Live
+                    counter · Since Nov 15, 2020</p>
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-8">Time spent building &amp; shipping</h2>
+
+                <!-- Counter grid -->
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-4 backdrop-blur-md">
+                        <span id="exp-years"
+                            class="text-3xl md:text-4xl font-black text-white count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Yrs</span>
+                    </div>
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-4 backdrop-blur-md">
+                        <span id="exp-months"
+                            class="text-3xl md:text-4xl font-black text-white count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Mon</span>
+                    </div>
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-4 backdrop-blur-md">
+                        <span id="exp-days"
+                            class="text-3xl md:text-4xl font-black text-white count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Days</span>
+                    </div>
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-4 backdrop-blur-md">
+                        <span id="exp-hours"
+                            class="text-3xl md:text-4xl font-black text-brand-purple count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Hrs</span>
+                    </div>
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-4 backdrop-blur-md">
+                        <span id="exp-mins"
+                            class="text-3xl md:text-4xl font-black text-brand-purple count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-gray-500 uppercase tracking-widest">Min</span>
+                    </div>
+                    <div
+                        class="counter-unit flex flex-col items-center gap-1 bg-white/[0.04] border border-brand-accent/30 rounded-2xl px-3 py-4 backdrop-blur-md glow-pulse">
+                        <span id="exp-secs"
+                            class="text-3xl md:text-4xl font-black text-brand-accent count-up tabular-nums">0</span>
+                        <span class="text-[10px] text-brand-accent/60 uppercase tracking-widest">Sec</span>
+                    </div>
+                </div>
+
+                <p class="mt-6 text-xs text-gray-600">and still counting…</p>
             </div>
         </section>
 
@@ -309,8 +367,9 @@
             <div class="absolute inset-0 bg-brand-dark/80 backdrop-blur-2xl"
                 onclick="if(window.chatStep==='bot'){closeChatModal()}"></div>
 
+            <!-- Modal card: full-screen on mobile, centered card on md+ -->
             <div
-                class="relative w-full max-w-2xl h-[85vh] bg-[#0a0a14] border border-white/10 rounded-3xl flex flex-col overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.2)] z-10">
+                class="relative w-full h-full md:max-w-2xl md:h-[85vh] md:rounded-3xl bg-[#0a0a14] border-0 md:border border-white/10 flex flex-col overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.2)] z-10">
                 <!-- Header -->
                 <div class="flex items-center justify-between px-5 py-4 border-b border-white/[0.07] shrink-0">
                     <div class="flex items-center gap-3">
@@ -400,9 +459,9 @@
                     <!-- ══ ADMIN LAYOUT (two-column) ══ -->
                     <div id="admin-layout" class="hidden h-full min-h-0 flex overflow-hidden">
 
-                        <!-- LEFT: Contacts Sidebar -->
+                        <!-- LEFT: Contacts Sidebar - full width on mobile, fixed width on md+ -->
                         <div id="contacts-sidebar"
-                            class="w-[220px] flex-shrink-0 border-r border-white/[0.07] flex flex-col bg-black/30 min-h-0">
+                            class="w-full md:w-[220px] flex-shrink-0 border-r border-white/[0.07] flex flex-col bg-black/30 min-h-0 absolute md:relative inset-0 z-10 transition-transform duration-300">
                             <!-- Sidebar header -->
                             <div class="px-3 pt-3 pb-2 shrink-0">
                                 <div class="flex items-center justify-between mb-2">
@@ -450,6 +509,14 @@
                             <!-- Chat top bar -->
                             <div id="admin-chat-header"
                                 class="shrink-0 px-4 py-3 border-b border-white/[0.07] bg-black/20 flex items-center gap-3">
+                                <!-- Back button (mobile only) -->
+                                <button id="admin-back-btn" onclick="window.adminShowContacts()"
+                                    class="md:hidden w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-gray-400 flex-shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
                                 <div id="admin-contact-avatar"
                                     class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-purple to-brand-accent flex items-center justify-center font-bold text-sm flex-shrink-0">
                                     ?</div>

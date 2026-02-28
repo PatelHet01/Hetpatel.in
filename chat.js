@@ -98,7 +98,17 @@ const show = (el, d = "flex") => { if (!el) return; el.classList.remove("hidden"
 const hide = (el) => { if (!el) return; el.classList.add("hidden"); el.style.display = ""; };
 
 window.closeChatModal = () => { hide(modal); modal.classList.remove("flex"); };
-window.openChatModal = () => { show(modal, "flex"); modal.classList.add("flex"); setTimeout(() => botInput.focus(), 80); };
+window.openChatModal = () => { show(modal, "flex"); modal.classList.add("flex"); setTimeout(() => botInput?.focus(), 80); };
+
+// Mobile admin panel switching (WhatsApp-style: contacts → chat)
+window.adminShowChat = () => {
+    const sb = document.getElementById("contacts-sidebar");
+    if (sb && window.innerWidth < 768) sb.style.transform = "translateX(-100%)";
+};
+window.adminShowContacts = () => {
+    const sb = document.getElementById("contacts-sidebar");
+    if (sb) sb.style.transform = "";
+};
 
 // ── GEMINI CHATBOT ─────────────────────────────────────────
 const staticReplies = [
@@ -591,13 +601,13 @@ function renderAdminUsers(users) {
 
         card.onclick = () => {
             currentRoomId = roomId;
-            // Update header
             document.getElementById("admin-contact-name").textContent = data.name;
             document.getElementById("admin-contact-sub").textContent = `#${code}`;
             document.getElementById("admin-contact-avatar").textContent = initial;
             listenMessages(currentRoomId);
             showUserLocation(code, data.name);
             renderAdminUsers(users);
+            window.adminShowChat(); // mobile: slide contacts out, show chat
         };
         list.appendChild(card);
 
