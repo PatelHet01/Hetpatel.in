@@ -489,23 +489,34 @@ async function uploadMedia(blob, type) {
     return await getDownloadURL(sRef(storage, path));
 }
 
-// ── FILE ATTACH ──────────────────────────────────────────
-fileInput.addEventListener("change", () => {
-    const f = fileInput.files[0]; if (!f) return;
+// ── ADMIN FILE ATTACH ─────────────────────────────────────
+document.getElementById("file-input")?.addEventListener("change", () => {
+    const fEl = document.getElementById("file-input");
+    const f = fEl.files[0]; if (!f) return;
     mediaBlob = f;
     mediaType = f.type.startsWith("image/") ? "image" : "video";
-    mediaLabel.textContent = `📎 ${f.name}`;
-    show(mediaPreview, "flex");
-    fileInput.value = "";
+    const lbl = document.getElementById("media-preview-label");
+    if (lbl) lbl.textContent = `📎 ${f.name}`;
+    show(document.getElementById("media-preview"), "flex");
+    fEl.value = "";
 });
-mediaCancel.addEventListener("click", clearMedia);
-function clearMedia() { mediaBlob = null; mediaType = null; hide(mediaPreview); mediaLabel.textContent = ""; }
+document.getElementById("media-cancel")?.addEventListener("click", clearMedia);
+function clearMedia() {
+    mediaBlob = null; mediaType = null;
+    hide(document.getElementById("media-preview"));
+    const lbl = document.getElementById("media-preview-label");
+    if (lbl) lbl.textContent = "";
+}
 
-// ── RECORDING ────────────────────────────────────────────
-voiceBtn.addEventListener("click", () => startRecording("audio"));
-vidnoteBtn.addEventListener("click", () => startRecording("video"));
+// ── ADMIN RECORDING ───────────────────────────────────────
+document.getElementById("voice-btn")?.addEventListener("click", () => startRecording("audio"));
+document.getElementById("vidnote-btn")?.addEventListener("click", () => startRecording("video"));
 
 async function startRecording(type) {
+    const recBar = document.getElementById("recording-bar");
+    const recLbl = document.getElementById("recording-label");
+    const mPrev = document.getElementById("media-preview");
+    const mLabel = document.getElementById("media-preview-label");
     try {
         const stream = await navigator.mediaDevices.getUserMedia(
             type === "video" ? { audio: true, video: { facingMode: "user", width: 320, height: 240 } } : { audio: true }
@@ -516,16 +527,18 @@ async function startRecording(type) {
         mediaRecorder.onstop = () => {
             mediaBlob = new Blob(recordChunks, { type: type === "video" ? "video/webm" : "audio/webm" });
             mediaType = type === "video" ? "vidnote" : "audio";
-            mediaLabel.textContent = type === "video" ? "🎥 Video note ready" : "🎙️ Voice note ready";
-            show(mediaPreview, "flex"); hide(recordingBar);
+            if (mLabel) mLabel.textContent = type === "video" ? "🎥 Video note ready" : "🎙️ Voice note ready";
+            show(mPrev, "flex"); hide(recBar);
             stream.getTracks().forEach(t => t.stop());
         };
         mediaRecorder.start();
-        recordingLabel.textContent = type === "video" ? "Recording video note…" : "Recording voice note…";
-        show(recordingBar, "flex");
+        if (recLbl) recLbl.textContent = type === "video" ? "Recording video note…" : "Recording voice note…";
+        show(recBar, "flex");
     } catch { alert("Camera/mic access denied."); }
 }
-stopRecBtn.addEventListener("click", () => { if (mediaRecorder?.state !== "inactive") mediaRecorder.stop(); });
+document.getElementById("stop-recording")?.addEventListener("click", () => {
+    if (mediaRecorder?.state !== "inactive") mediaRecorder.stop();
+});
 
 // ── AUTO-RESIZE TEXTAREA ─────────────────────────────────
 ["message-input", "user-message-input"].forEach(id => {
